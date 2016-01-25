@@ -11,29 +11,29 @@ class TgaLetsEncryptExtensionTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
-    public function testThrowsExceptionWhenScriptNotSet()
+    public function testFailsWhenScriptNotSet()
     {
         $loader = new TgaLetsEncryptExtension();
         $config = $this->getEmptyConfig();
-        unset($config['script']);
+        unset($config['letsencrypt']);
         $loader->load([ $config ], new ContainerBuilder());
     }
 
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
-    public function testThrowsExceptionWhenScriptEmpty()
+    public function testFailsWhenScriptEmpty()
     {
         $loader = new TgaLetsEncryptExtension();
         $config = $this->getEmptyConfig();
-        $config['script'] = '';
+        $config['letsencrypt'] = '';
         $loader->load([ $config ], new ContainerBuilder());
     }
 
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
-    public function testThrowsExceptionWhenRecoveryEmailNotSet()
+    public function testFailsWhenRecoveryEmailNotSet()
     {
         $loader = new TgaLetsEncryptExtension();
         $config = $this->getEmptyConfig();
@@ -44,7 +44,7 @@ class TgaLetsEncryptExtensionTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
-    public function testThrowsExceptionWhenRecoveryEmailEmpty()
+    public function testFailsWhenRecoveryEmailEmpty()
     {
         $loader = new TgaLetsEncryptExtension();
         $config = $this->getEmptyConfig();
@@ -55,7 +55,7 @@ class TgaLetsEncryptExtensionTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
-    public function testThrowsExceptionWhenDomainsNotSet()
+    public function testFailsWhenDomainsNotSet()
     {
         $loader = new TgaLetsEncryptExtension();
         $config = $this->getEmptyConfig();
@@ -66,7 +66,7 @@ class TgaLetsEncryptExtensionTest extends \PHPUnit_Framework_TestCase
     /**
      * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
      */
-    public function testThrowsExceptionWhenDomainsEmpty()
+    public function testFailsWhenDomainsEmpty()
     {
         $loader = new TgaLetsEncryptExtension();
         $config = $this->getEmptyConfig();
@@ -74,10 +74,57 @@ class TgaLetsEncryptExtensionTest extends \PHPUnit_Framework_TestCase
         $loader->load([ $config ], new ContainerBuilder());
     }
 
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testFailsWhenScriptDoesNotExists()
+    {
+        $loader = new TgaLetsEncryptExtension();
+        $config = $this->getEmptyConfig();
+        $config['script'] = 'invalid';
+        $loader->load([ $config ], new ContainerBuilder());
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testFailsWhenLogsDirDoesNotExists()
+    {
+        $loader = new TgaLetsEncryptExtension();
+        $config = $this->getEmptyConfig();
+        $config['logs_directory'] = 'invalid';
+        $loader->load([ $config ], new ContainerBuilder());
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testFailsWhenRecoveryEmailNotValid()
+    {
+        $loader = new TgaLetsEncryptExtension();
+        $config = $this->getEmptyConfig();
+        $config['recovery_email'] = 'invalid';
+        $loader->load([ $config ], new ContainerBuilder());
+    }
+
+    /**
+     * @expectedException \Symfony\Component\Config\Definition\Exception\InvalidConfigurationException
+     */
+    public function testFailsWhenMonitoringEmailNotValid()
+    {
+        $loader = new TgaLetsEncryptExtension();
+        $config = $this->getEmptyConfig();
+        $config['monitoring']['email']['enabled'] = true;
+        $config['monitoring']['email']['to'] = ['invalid'];
+        $loader->load([ $config ], new ContainerBuilder());
+    }
+
     private function getEmptyConfig()
     {
+        $script = __DIR__ . '/../Fixtures/mockscript-ok.php';
+
         $yaml = <<<EOF
-script: "%kernel.root_dir%/../bin/letsencrypt/letsencrypt-auto"
+letsencrypt: "$script"
 recovery_email: tgalopin@example.org
 domains:
     - example.org
@@ -89,8 +136,10 @@ EOF;
 
     private function getFullConfig()
     {
+        $script = __DIR__ . '/../Fixtures/mockscript.sh';
+
         $yaml = <<<EOF
-script: "%kernel.root_dir%/../bin/letsencrypt/letsencrypt-auto"
+letsencrypt: "$script"
 recovery_email: tgalopin@example.org
 logs_directory: /var/log/letsencrypt
 domains:

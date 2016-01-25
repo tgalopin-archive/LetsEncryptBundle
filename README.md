@@ -54,8 +54,8 @@ Simply configure the bundle to your needs:
 
 tga_lets_encrypt:
 
-    # Path to the Let's Encrypt executable used by the bundle (usually your letsencrypt-auto binary)
-    script:               ~ # Required
+    # Path to the Let's Encrypt executable (usually your letsencrypt-auto binary)
+    letsencrypt:          ~ # Required
 
     # Recovery email used by Let's Encrypt for registration and recovery contact
     recovery_email:       ~ # Required
@@ -85,7 +85,7 @@ and use it as script. You probably also want to be warned by email if an error o
 # app/config/config.yml
 
 tga_lets_encrypt:
-    script: "%kernel.root_dir%/../bin/letsencrypt/letsencrypt-auto"
+    letsencrypt: "%kernel.root_dir%/../bin/letsencrypt/letsencrypt-auto"
     recovery_email: "youremail@example.org"
     domains:
         - example1.org

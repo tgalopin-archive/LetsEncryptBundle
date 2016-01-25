@@ -31,8 +31,8 @@ class Configuration implements ConfigurationInterface
 
         $rootNode
             ->children()
-                ->scalarNode('script')
-                    ->info('Let\'s Encrypt executable used by the bundle (usually your letsencrypt-auto binary)')
+                ->scalarNode('letsencrypt')
+                    ->info('Path to the Let\'s Encrypt executable (usually your letsencrypt-auto binary)')
                     ->isRequired()
                     ->cannotBeEmpty()
                 ->end()

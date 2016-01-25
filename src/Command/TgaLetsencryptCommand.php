@@ -29,7 +29,7 @@ class TgaLetsencryptCommand extends ContainerAwareCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $argument = $input->getArgument('argument');
+        $commandParts = [];
 
         if ($input->getOption('option')) {
             // Script: ./letsencrypt-auto
@@ -44,7 +44,6 @@ class TgaLetsencryptCommand extends ContainerAwareCommand
             // sudo -H ./letsencrypt-auto certonly --manual-public-ip-logging-ok --agree-tos --staging --renew-by-default --email galopintitouan@gmail.com -d example.org
         }
 
-        $output->writeln('Command result.');
     }
 
 }
