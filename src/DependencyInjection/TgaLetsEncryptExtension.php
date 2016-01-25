@@ -44,6 +44,7 @@ class TgaLetsEncryptExtension extends Extension
 
         // Email monitoring
         $container->setParameter('tga_lets_encrypt.monitoring.email.enabled', $config['monitoring']['email']['enabled']);
+        $container->setParameter('tga_lets_encrypt.monitoring.email.send_on_success', $config['monitoring']['email']['send_on_success']);
         $container->setParameter('tga_lets_encrypt.monitoring.email.to', $config['monitoring']['email']['to']);
     }
 
