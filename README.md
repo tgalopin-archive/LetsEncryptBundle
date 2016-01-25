@@ -50,10 +50,11 @@ Usage
 Simply configure the bundle to your needs:
 
 ``` yaml
-# Default configuration for extension with alias: "tga_lets_encrypt"
+# app/config/config.yml
+
 tga_lets_encrypt:
 
-    # Let's Encrypt executable used by the bundle (usually your letsencrypt-auto binary)
+    # Path to the Let's Encrypt executable used by the bundle (usually your letsencrypt-auto binary)
     script:               ~ # Required
 
     # Recovery email used by Let's Encrypt for registration and recovery contact
@@ -76,6 +77,27 @@ tga_lets_encrypt:
             to:                   []
 ```
 
+For a classical setup, you can clone the Let's Encrypt repository in your `bin` directory
+(`cd /path/to/your/project/bin && git clone https://github.com/letsencrypt/letsencrypt`)
+and use it as script. You probably also want to be warned by email if an error occurs.
+
+``` yaml
+# app/config/config.yml
+
+tga_lets_encrypt:
+    script: "%kernel.root_dir%/../bin/letsencrypt/letsencrypt-auto"
+    recovery_email: "youremail@example.org"
+    domains:
+        - example1.org
+        - www.example1.org
+        - example2.org
+        - www.example2.org
+    monitoring:
+        email:
+            enabled: true
+            to: [ "youremail@example.org" ]
+```
+
 You can test your parameters work properly by running:
 
 ```
@@ -85,6 +107,14 @@ $ sudo -H php bin/console tga:letsencrypt
 ```
 
 > You need to run this script as root as Let's Encrypt need root privileges.
+
+And you can check you are properly warned if an error occurs by running:
+
+```
+$ sudo -H php app/console tga:letsencrypt --emulate-failure
+# Or for Symfony 3
+$ sudo -H php bin/console tga:letsencrypt --emulate-failure
+```
 
 If everything work as expected, you can configure a CRON task to run this command
 every 2 days for instance:
