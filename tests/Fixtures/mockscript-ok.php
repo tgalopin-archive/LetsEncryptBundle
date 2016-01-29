@@ -17,6 +17,7 @@ for ($i = 0; $i < 5; $i++) {
 }
 
 echo <<<EOF
+
 Requesting root privileges to run with virtualenv: sudo /home/tgalopin/.local/share/letsencrypt/bin/letsencrypt certonly --manual --manual-public-ip-logging-ok --agree-tos --renew-by-default --email youremail@example.org --logs-dir /home/tgalopin/devenv/www/letsencrypt/bundle/tests/Command/../Fixtures/tmp --domain example.org --staging
 Make sure your web server displays the following content at
 http://example.org/.well-known/acme-challenge/SBBEo6f2YSglhV1d3wYJKDIhDtNtS76XTWVH_OPXmiI before continuing:
@@ -37,5 +38,9 @@ s.serve_forever()"
 Press ENTER to continue
 EOF;
 
-$handle = fopen('php://stdin', 'r');
-$line = fgets($handle);
+fgets(fopen('php://stdin', 'r'));
+
+echo "OK\n";
+
+
+

@@ -17,6 +17,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\ProcessBuilder;
 
 class TgaLetsencryptCommand extends ContainerAwareCommand
 {
@@ -49,11 +51,13 @@ class TgaLetsencryptCommand extends ContainerAwareCommand
         $recoveryMail = $this->container->getParameter('tga_lets_encrypt.recovery_email');
         $logDir = $this->container->getParameter('tga_lets_encrypt.logs_directory');
 
+        $output = '';
+
         foreach ($domains as $domain) {
-            $this->letsencrypt($script, $domain, $recoveryMail, $logDir);
+            $output .= $this->letsencrypt($script, $domain, $recoveryMail, $logDir) . "\n";
         }
 
-
+        $this->output->write($output);
     }
 
     /**
@@ -64,52 +68,59 @@ class TgaLetsencryptCommand extends ContainerAwareCommand
      */
     private function letsencrypt($script, $domain, $recoveryMail, $logsDir)
     {
-        $command = [];
+        try {
 
-        // Script
-        $command[] = $script;
+            $command = [];
 
-        // We will use Symfony for the well-known challenge
-        $command[] = 'certonly';
-        $command[] = '--manual';
+            // Script
+            $command[] = $script;
 
-        // Disable interaction
-        $command[] = '--manual-public-ip-logging-ok';
-        $command[] = '--agree-tos';
-        $command[] = '--renew-by-default';
+            // We will use Symfony for the well-known challenge
+            $command[] = 'certonly';
+            $command[] = '--manual';
 
-        // Recovery e-mail
-        $command[] = '--email';
-        $command[] = $recoveryMail;
+            // Disable interaction
+            $command[] = '--manual-public-ip-logging-ok';
+            $command[] = '--agree-tos';
+            $command[] = '--renew-by-default';
 
-        // Logs directory
-        $command[] = '--logs-dir';
-        $command[] = $logsDir;
+            // Recovery e-mail
+            $command[] = '--email';
+            $command[] = $recoveryMail;
 
-        // Domain
-        $command[] = '--domain';
-        $command[] = $domain;
+            // Logs directory
+            $command[] = '--logs-dir';
+            $command[] = $logsDir;
 
+            // Domain
+            $command[] = '--domain';
+            $command[] = $domain;
 
-        // Build command
-        $command = implode(' ', $command);
+            $process = new Process(implode(' ', $command));
 
-        var_dump($command);
-        exit;
+            $stdin = fopen('php://temp', 'w+');
+            $process->setInput($stdin);
 
+            $process->start(function ($type, $data) {
+                if (strpos($data, '.well-known/acme-challenge') !== false) {
+                    preg_match('~\.well-known/acme-challenge/([^ ]+) ~U', $data, $match);
+                    var_dump($match);
+                }
+            });
 
+            $gotCert = false;
 
-        // Script: ./letsencrypt-auto
+            while($process->isRunning()) {
+                /*if (! $gotCert && strpos($process->getOutput(), 'Press ENTER to continue') !== false) {
+                    $gotCert = true;
+                    // ...
+                    fwrite($stdin, "\n");
+                }*/
+            }
 
-        // certonly
-        // --manual-public-ip-logging-ok
-        // --agree-tos
-        // --renew-by-default
-        // -d example.org
-        // --logs-dir
-
-        // sudo -H ./letsencrypt-auto certonly --manual-public-ip-logging-ok --agree-tos --staging --renew-by-default --email galopintitouan@gmail.com -d example.org
-
+        } catch (\Exception $e) {
+            $this->handleError($e->getMessage(), $domain);
+        }
     }
 
     private function handleError($message, $domain = null)

@@ -11,7 +11,6 @@
 
 namespace Tga\LetsEncryptBundle\Tests\Command;
 
-use Symfony\Bundle\FrameworkBundle\Client;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 use Symfony\Component\DependencyInjection\Container;
